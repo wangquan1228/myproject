@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- 加载属性文件 -->
+	<context:property-placeholder
+		location="classpath:db.properties" />
+
+	<!-- 配置数据源 -->
+	<bean id="dataSource"
+		class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driverClass}" />
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}" />
+		<property name="user" value="${jdbc.user}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+	<!-- 配置LocalSessionFactoryBean，spring提供的用于整合hibernate的工厂bean -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- 注入hibernate相关的属性配置 -->
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+			</props>
+		</property>
+		<!-- 注入hibernate的映射文件 -->           <!-- ！！！！这个地方需要修改 -->
+		<property name="mappingLocations">
+			<list>
+				<value>classpath:com/wq/bos/domain/*.xml</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<!-- 组件扫描 -->				<!-- ！！！！！这里需要修改 -->
+	<context:component-scan
+		base-package="com.wq.bos" />
+
+	<!-- 支持spring注解 -->
+	<context:annotation-config />
+
+	<!-- 注解驱动 -->
+	<tx:annotation-driven />
+	<!-- 注册客户端,注册代理对象 -->
+	<jaxws:client id="myClient"
+		serviceClass="com.wq.crm.utils.CustomerService"
+		address="http://127.0.0.1:8080/crm_customer/customer">
+	</jaxws:client>
+
+	<!-- 配置spring框架的工厂 -->
+	<bean id="shiroFilter"
+		class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<!-- shiro 的核心安全接口 -->
+		<property name="securityManager" ref="securityManager" />
+		<!-- 要求登录时的链接 -->
+		<property name="loginUrl" value="/login.jsp" />
+		<!-- 登陆成功后要跳转的连接 -->
+		<property name="successUrl" value="/index.jsp" />
+		<!-- 未授权时要跳转的连接 -->
+		<property name="unauthorizedUrl" value="/unauthorized.jsp" />
+		<!-- shiro 连接约束配置 -->
+		<property name="filterChainDefinitions">
+			<value>
+				<!-- 对静态资源设置匿名访问 -->
+				/css/** = anon
+				/js/** = anon
+				/images/** = anon
+				<!-- 登录页面,可匿名访问 -->
+				/login.jsp = anon
+				<!-- 验证码，可匿名访问 -->
+				/validatecode.jsp* = anon
+				/UserAction_login.action = anon
+				<!--必须带有指定权限 staff-list -->
+				 /page_base_staff.action = perms["staff-list"] 
+				<!-- /** = authc 所有url都必须认证通过才可以访问 -->
+				/** = authc
+				<!-- /** = anon所有url都可以匿名访问 -->
+			</value>
+		</property>
+	</bean>
+	<!-- 注册realmb对象 -->
+	<bean id="bosRealm" class="com.wq.bos.realm.BosRealm"></bean>
+	<!--注册安全管理器对象 -->
+	<bean id="securityManager"
+		class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="bosRealm"></property>
+	</bean>
+	<!-- 开启shiro注解驱动支持 -->
+	<bean id="defaultAdvisorAutoProxyCreator"
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
+		<!-- 使用cglib 为action 创建代理对象 -->
+		<property name="proxyTargetClass" value="true"></property>
+	</bean>
+	<!-- 配置shiro 框架提供的切面类,用于创建代理对象 -->
+	<bean
+		class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+	</bean>
+</beans>

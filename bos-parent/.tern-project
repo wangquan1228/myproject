@@ -1,0 +1,31 @@
+{
+  "plugins": {
+    "guess-types": {
+      
+    },
+    "node": {
+      
+    },
+    "angular1": {
+      
+    },
+    "yui3": {
+      
+    },
+    "bootstrap": {
+      
+    },
+    "aui1.5.x": {
+      
+    },
+    "jquery-ui1-12": {
+      
+    }
+  },
+  "libs": [
+    "ecma5",
+    "browser",
+    "jquery"
+  ],
+  "ecmaVersion": 5
+}

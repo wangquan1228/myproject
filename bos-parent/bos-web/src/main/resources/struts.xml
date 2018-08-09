@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<!-- i18n:国际化.解决post提交乱码 -->
+	<constant name="struts.i18n.encoding" value="UTF-8"></constant>
+	<!--struts.devMode 开发模式，false控制台信息多少 -->
+	<constant name="struts.devMode" value="false" />
+	<!--整合spring mvc struts2-spring-plugin包 -->
+	<constant name="struts.objectFactory" value="spring" />
+	<package name="basicstruts2" extends="struts-default">
+		<!-- 注册拦截器 -->
+		<interceptors>
+			<!-- 注册自定义拦截器 -->
+			<interceptor name="loginInter"
+				class="com.wq.bos.web.intercepter.LoginInterceptor"></interceptor>
+			<interceptor-stack name="myStack">
+				<interceptor-ref name="loginInter">
+					<param name="excludeMethods">login,saveUser</param>
+				</interceptor-ref>
+				<!-- 引入默认拦截器 -->
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<!-- 指定包中的默认拦拦截器栈 -->
+		<default-interceptor-ref name="myStack"></default-interceptor-ref>
+		<global-results>
+			<result name="error">/</result>
+			<result name="login" type="redirect">/login.jsp</result>
+		</global-results>
+		<!-- 需要进行权限控制的页面访问 struts2-core包 -->
+		<action name="page_*_*">
+			<result type="dispatcher">/WEB-INF/pages/{1}/{2}.jsp</result>
+		</action>
+        <!-- 用户登录管理 -->
+		<action name="UserAction_*" class="userAction" method="{1}">
+			<result name="login">/login.jsp</result>
+			<result name="home">/index.jsp</result>
+			<result name="list">/WEB-INF/pages/admin/userlist.jsp</result>
+		</action>
+		<!-- 取派员设置-->
+		<action name="StaffAction_*" class="staffAction" method="{1}">
+		     <result name="list">/WEB-INF/pages/base/staff.jsp</result>
+		</action>
+		<!-- 区域管理 -->
+		<action name="RegionAction_*" class="regionAction" method="{1}"></action>
+		<!-- 分区管理 -->
+		<action name="SubareaAction_*" class="subareaAction" method="{1}">
+		  <result name="list">/WEB-INF/pages/base/subarea.jsp</result>
+		</action>
+		<!-- 定区管理 -->
+		<action name="DecidedzoneAction_*" class="decidedzoneAction" method="{1}">
+		  <result name="list">/WEB-INF/pages/base/decidedzone.jsp</result>
+		</action>
+		<!-- 取派 -->
+		<action name="NoticebillAction_*" class="noticebillAction" method="{1}">
+		  <result name="noticebill_add">/WEB-INF/pages/qupai/noticebill_add.jsp</result>
+		</action>
+		<!-- 权限管理 -->
+		<action name="FunctionAction_*" class="functionAction" method="{1}">
+		  <result name="list">/WEB-INF/pages/admin/function.jsp</result>
+		</action>
+		<!-- 角色管理 -->
+		<action name="RoleAction_*" class="roleAction" method="{1}">
+		<result name="list"> /WEB-INF/pages/admin/role.jsp</result>
+		</action>
+	</package>
+</struts>
