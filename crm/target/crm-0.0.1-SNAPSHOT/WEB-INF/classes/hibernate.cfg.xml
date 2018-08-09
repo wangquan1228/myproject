@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+                                         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory>
+		<!-- session与当前事物进行绑定 但是此时事务交个spring管理,在这儿在写的话与spring冲突了 -->
+		<!--<property name="hibernate.current_session_context_class">thread</property> -->
+		<mapping resource="com/wq/bean/Customer.hbm.xml" />
+		<mapping resource="com/wq/bean/User.hbm.xml" />
+		<mapping resource="com/wq/bean/LinkMan.hbm.xml" />
+	</session-factory>
+</hibernate-configuration>

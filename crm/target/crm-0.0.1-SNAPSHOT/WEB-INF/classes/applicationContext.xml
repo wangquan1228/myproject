@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+
+    <!-- 开启包扫描模式 -->
+    <context:component-scan base-package="com.wq"></context:component-scan>
+    <!-- 加载properties文件 -->
+    <context:property-placeholder
+        location="classpath:db.properties" />
+    <bean name="dataSource"
+        class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+        <property name="driverClass" value="${jdbc.driverClass}"></property>
+        <property name="user" value="${jdbc.jdbcUser}"></property>
+        <property name="password" value="${jdbc.jdbcPassword}"></property>
+    </bean>
+
+    <!-- 方法2: 在spring中配置hibernate -->
+    <bean name="sessionFactory"
+        class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <!-- 将连接池注入到sessionFactory中,hibernate会通过连接池获得连接 -->
+        <property name="dataSource" ref="dataSource"></property>
+        <!-- prperties类型注入 -->
+        <property name="hibernateProperties">
+            <props>
+                <!-- 必填项 -->
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <!-- 可选项 -->
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+            </props>
+        </property>
+        <!-- 引入orm元数据,指定orm元数据所在的包路径，spring会自动读取包中的所有配置 -->
+        <property name="mappingDirectoryLocations"
+            value="classpath:com/wq/bean"></property>
+    </bean>
+
+
+    <!-- spring核心事务管理器 -->
+    <bean name="transactionManager"
+        class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+    <!-- 开启事物 ，注解开发 -->
+    <tx:annotation-driven
+        transaction-manager="transactionManager" />
+
+
+
+
+
+
+</beans>
+ 
